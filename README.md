@@ -1,1 +1,1 @@
-# gal_template_project
+navigation app - school work
