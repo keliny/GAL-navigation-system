@@ -132,7 +132,7 @@ class OSMSimpleNav
   def run_with_ids
     # do the magic
     pathFinder = Find_shortest_path.new(@visual_graph, @id_start, @id_end)
-    pathFinder.find
+    path = pathFinder.find
 
     # check if export file is defined
     if @out_file != nil

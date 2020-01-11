@@ -17,8 +17,18 @@ class Find_shortest_path
     # dijkstr
     @distances[@startId][:travelTime] = 0
     @visitedNodes << @startId
-    until @distances.include? (Float::INFINITY) do
-      adjacentVerticesToCheck = []
+
+    counter = 0
+    adjacentVerticesToCheck = []
+
+    while (@distances.collect { |x| x[1][:travelTime] }).include? (Float::INFINITY) do
+      counter += 1
+      travelTimes = @distances.collect { |x| x[1][:travelTime] }.select { |x| x == Float::INFINITY }.count
+      #travelTimes = @distances.collect {|x| x[1][:travelTime]}.include? (2)
+      #p travelTimes
+      #(@distances.collect {|x| x[1][:travelTime] == Float::INFINITY}).count
+      #p "step number: #{counter}, there are #{travelTimes} values with infinity, n: #{@n}, "
+
       @n.each do |n|
         # find adjacent nodes
         adjacentVerticesV1, adjacentVerticesV2 = getNeighbors(n) # these are actually edges
@@ -44,7 +54,14 @@ class Find_shortest_path
               vertex[:path] << n
             end
           end
-          adjacentVerticesToCheck << {:id => adjacent[:originalEdge].v1.id, :distance => @distances[adjacent[:originalEdge].v1.id][:travelTime]} unless (adjacentVerticesToCheck.select { |x| x[@distances[adjacent[:originalEdge].v1.id]] }).length != 0
+          # check if the vertex is already in the checklist
+          if adjacentVerticesToCheck.collect { |x| x[:id] }.include? (adjacent[:originalEdge].v1.id)
+            originalValue = adjacentVerticesToCheck.select { |x| x[:id] == adjacent[:originalEdge].v1.id }
+            originalValue[0][:distance] = @distances[adjacent[:originalEdge].v1.id][:travelTime]
+          else
+            adjacentVerticesToCheck << {:id => adjacent[:originalEdge].v1.id, :distance => @distances[adjacent[:originalEdge].v1.id][:travelTime]} #unless (adjacentVerticesToCheck.select { |x| x[@distances[adjacent[:originalEdge].v1.id]] }).length != 0
+          end
+
         end
         adjacentVerticesV2.each do |adjacent|
           if @distances[adjacent[:originalEdge].v2.id][:travelTime] == Float::INFINITY
@@ -66,28 +83,41 @@ class Find_shortest_path
               vertex[:path] << n
             end
           end
-          adjacentVerticesToCheck << {:id => adjacent[:originalEdge].v2.id, :distance => @distances[adjacent[:originalEdge].v2.id][:travelTime]} unless (adjacentVerticesToCheck.select { |x| x[@distances[adjacent[:originalEdge].v2.id]] }).length != 0
+
+          if adjacentVerticesToCheck.collect { |x| x[:id] }.include? (adjacent[:originalEdge].v2.id)
+            originalValue = adjacentVerticesToCheck.select { |x| x[:id] == adjacent[:originalEdge].v2.id }
+            originalValue[0][:distance] = @distances[adjacent[:originalEdge].v2.id][:travelTime]
+          else
+            adjacentVerticesToCheck << {:id => adjacent[:originalEdge].v2.id, :distance => @distances[adjacent[:originalEdge].v2.id][:travelTime]} #unless (adjacentVerticesToCheck.select { |x| x[@distances[adjacent[:originalEdge].v2.id]] }).length != 0
+          end
         end
 
       end
       # get the shortest one
       adjacentVerticesToCheck.sort_by! { |x| x[:distance] }
-      adjacentVerticesToCheck.select! { |x| x[:distance] == adjacentVerticesToCheck[0][:distance] } # gives us array with same minimal values
+      toDoVertices = adjacentVerticesToCheck.select { |x| x[:distance] == adjacentVerticesToCheck[0][:distance] } # gives us array with same minimal values
 
       # move values from n in to visisetd collection
       @n.length.times do
         @visitedNodes << @n.shift
       end
 
+      # move the lowest travelTime vertices to n and remove them from available nodes -> adjacentverticestocheck
       # move the new values to @n
-      adjacentVerticesToCheck.each do |newValue|
-        @n << newValue[:id]
+      toDoVertices.count.times do |index|
+        @n << (adjacentVerticesToCheck.shift)[:id]
       end
+
+      #adjacentVerticesToCheck.each do |newValue|
+      #  @n << newValue[:id]
+      #end
 
     end
 
+     #p @distances[@startId]
+     #p @distances[@endId]
 
-    puts 'hi'
+    @distances[@endId]
   end
 
   def getNeighbors(vertexId)
