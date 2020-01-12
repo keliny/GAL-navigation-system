@@ -3,6 +3,7 @@ require_relative 'process_logger';
 require_relative 'lib/component_getter';
 require_relative 'lib/Cli';
 require_relative 'lib/find_shortest_path';
+require_relative 'lib/getIdsFromLonLat';
 
 # Class representing simple navigation based on OpenStreetMap project
 class OSMSimpleNav
@@ -80,8 +81,10 @@ class OSMSimpleNav
         #  # load output file
         @out_file = ARGV.shift
       elsif ARGV.length == 5
-        @id_start = ARGV.shift
-        @id_end = ARGV.shift
+        @lat_start = ARGV.shift
+        @lon_start = ARGV.shift
+        @lat_end = ARGV.shift
+        @lon_end = ARGV.shift
 
         # load output file
         @out_file = ARGV.shift
@@ -123,6 +126,7 @@ class OSMSimpleNav
   end
 
   def run_interface
+    #--load-comp data/near_ucl.osm --show-nodes
     cli = Cli.new(@visual_graph)
     @id_start, @id_end = cli.run
 
@@ -130,10 +134,12 @@ class OSMSimpleNav
   end
 
   def run_with_ids
+    # --load-comp data/near_ucl.osm --show-nodes 25973309 25973247 exported.pdf
     # do the magic
     pathFinder = Find_shortest_path.new(@visual_graph, @id_start, @id_end)
     path, @visual_graph = pathFinder.find
 
+    puts "It will take #{path[:travelTime]} seconds to get there!"
     # check if export file is defined
     if @out_file != nil
       # export to a file
@@ -141,8 +147,22 @@ class OSMSimpleNav
     end
   end
 
-  def run_with_lon_and_lat(lat_start, lon_start, lat_end, lon_end)
+  def run_with_lon_and_lat()
+    # --load-comp data/near_ucl.osm --show-nodes 50.0893964 14.4668171 50.0875307 14.4606473 exported.pdf
+    if @lat_start == @lon_start && @lon_end == @lat_end
+      puts "You are where you want to be."
+      return
+    end
 
+    idGetter = Get_Ids_from_lat_lon.new(@visual_graph, @lat_start, @lat_end, @lon_start, @lon_end)
+    @id_start, @id_end = idGetter.GetIds
+
+    if @id_start == nil || @id_end == nil
+      puts "You have entered incorrect values."
+      return
+    end
+
+    run_with_ids
   end
 
   def midist

@@ -13,6 +13,9 @@ class Find_shortest_path
   end
 
   def find
+    # NOTE - I am supposed to build a navigation system, so logically for evaluating the edges I am using travel time between to nodes
+    # to modify this to work with the distances instead => simply change travelTime for distance but then this app will loose it's purpose
+
     # find the shortest route
     # dijkstr
     @distances[@startId][:travelTime] = 0

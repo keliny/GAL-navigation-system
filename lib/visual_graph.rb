@@ -48,7 +48,6 @@ class VisualGraph
       addedEdge = graph_viz_output.add_edges( edge.v1.id, edge.v2.id, 'arrowhead' => 'none' )
       if edge.emphesized != nil
         addedEdge.set do |e|
-          p edge
           e.color = edge.emphesized[0][:color]
           e.penwidth = edge.emphesized[1][:penwidth]
         end
