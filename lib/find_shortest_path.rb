@@ -102,7 +102,7 @@ class Find_shortest_path
         @visitedNodes << @n.shift
       end
 
-      # move the lowest travelTime vertices to n and remove them from available nodes -> adjacentverticestocheck
+      # move the lowest travelTime vertices to n and remove them from available nodes -> adjacentverticestocheckl
       # move the new values to @n
       toDoVertices.count.times do |index|
         @n << (adjacentVerticesToCheck.shift)[:id]
@@ -117,7 +117,30 @@ class Find_shortest_path
      #p @distances[@startId]
      #p @distances[@endId]
 
-    @distances[@endId]
+    for i in 0..(@distances[@endId][:path].count - 2)
+      # get the edge
+      edge = findEdge(@distances[@endId][:path][i], @distances[@endId][:path][i+1])
+
+      # modify the emphesized value or w/e it is
+      edge.emphesized = [{:color => "green"},{:penwidth => '3'}]
+    end
+
+    return @distances[@endId], @visualGraph
+  end
+
+  #method to find edge from 2 vertices
+  def findEdge(vertex1, vertex2)
+    visualedges = @visualGraph.visual_edges
+    visualedges.each do |edge|
+      if edge.v1.id == vertex1 && edge.v2.id == vertex2
+        # edge from vertex1 to vertex2
+        return edge
+      elsif edge.v2.id == vertex1 && edge.v1.id == vertex2
+        # edge from vertex2 to vertex1
+        return edge
+      end
+    end
+    return nil
   end
 
   def getNeighbors(vertexId)

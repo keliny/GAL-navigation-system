@@ -132,11 +132,12 @@ class OSMSimpleNav
   def run_with_ids
     # do the magic
     pathFinder = Find_shortest_path.new(@visual_graph, @id_start, @id_end)
-    path = pathFinder.find
+    path, @visual_graph = pathFinder.find
 
     # check if export file is defined
     if @out_file != nil
       # export to a file
+      @visual_graph.export_graphviz(@out_file)
     end
   end
 
@@ -163,7 +164,7 @@ class OSMSimpleNav
     elsif file_type(@map_file) == "dot" or file_type(@map_file) == "gv" then
       import_graph
     else
-      puts "Imput file type not recognized!"
+      puts "Input file type not recognized!"
       usage
     end
 
